@@ -1,0 +1,25 @@
+{
+  "name": "nilesh-ai-backend",
+  "version": "1.0.0",
+  "description": "Nilesh — MyPersonalAI Backend API",
+  "type": "module",
+  "main": "src/index.ts",
+  "scripts": {
+    "dev":   "node --watch --experimental-strip-types src/index.ts",
+    "start": "node --experimental-strip-types src/index.ts"
+  },
+  "dependencies": {
+    "@google/genai":   "^2.30.0",
+    "cors":            "^2.8.5",
+    "dotenv":          "^16.4.5",
+    "express":         "^4.19.2",
+    "mongoose":        "^8.4.1",
+    "multer":          "^1.4.5-lts.1"
+  },
+  "devDependencies": {
+    "@types/cors":           "^2.8.17",
+    "@types/express":        "^4.17.21",
+    "@types/multer":         "^1.4.11",
+    "@types/node":           "^20.14.2"
+  }
+}

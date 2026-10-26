@@ -1,0 +1,51 @@
+{
+  "app": {
+    "name": "MyPersonalAI",
+    "version": "0.1.0"
+  },
+  "ai": {
+    "mode": "local",
+    "defaultLocalModel": "qwen2.5-coder:3b",
+    "ollamaBaseUrl": "http://localhost:11434",
+    "availableLocalModels": [
+      { "id": "qwen2.5-coder:1.5b", "label": "Qwen 2.5 Coder 1.5B (Fastest)", "ramRequired": 3 },
+      { "id": "qwen2.5-coder:3b",   "label": "Qwen 2.5 Coder 3B (Recommended)", "ramRequired": 5 },
+      { "id": "deepseek-coder:6.7b-instruct-q4_0", "label": "DeepSeek Coder 6.7B Q4 (High Quality)", "ramRequired": 8 }
+    ]
+  },
+  "permissions": {
+    "categoryA_autoApprove": [
+      "read_workspace_files",
+      "search_local_docs",
+      "generate_code",
+      "edit_project_code",
+      "run_tests",
+      "read_error_logs",
+      "search_public_docs_online"
+    ],
+    "categoryB_requireApproval": [
+      "install_dependencies",
+      "run_shell_commands",
+      "access_files_outside_workspace",
+      "upload_to_online_ai",
+      "use_paid_apis",
+      "access_credentials",
+      "start_deployment"
+    ],
+    "categoryC_requireExplicit": [
+      "delete_files",
+      "delete_databases",
+      "publish_private_info",
+      "submit_forms",
+      "financial_transactions",
+      "change_security_settings"
+    ]
+  },
+  "paths": {
+    "projectsDir": "../projects",
+    "knowledgeDir": "../knowledge",
+    "logsDir": "../logs",
+    "backupsDir": "../backups",
+    "aiModelsDir": "../ai/models"
+  }
+}

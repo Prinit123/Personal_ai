@@ -1,0 +1,285 @@
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+enum Role {
+  STUDENT
+  TEACHER
+  ADMIN
+}
+
+enum AvailabilityStatus {
+  AVAILABLE
+  IN_CLASS
+  BUSY
+  ON_LEAVE
+  NOT_UPDATED
+}
+
+enum StudentCampusStatus {
+  ON_CAMPUS
+  IN_CLASS
+  IN_LIBRARY
+  IN_LABORATORY
+  IN_CANTEEN
+  AWAY
+  BUSY
+}
+
+enum VisibilityLevel {
+  PUBLIC
+  STUDENTS_ONLY
+  PRIVATE
+}
+
+enum ResourceType {
+  SYLLABUS
+  PREVIOUS_PAPER
+  NOTES
+  BOOK
+  PRACTICAL_MANUAL
+  IMPORTANT_QUESTIONS
+  ASSIGNMENT
+  MODEL_PAPER
+  VIDEO_LECTURE
+}
+
+model User {
+  id               String   @id @default(uuid())
+  email            String   @unique
+  password         String
+  fullName         String
+  role             Role     @default(STUDENT)
+  avatarUrl        String?
+  phone            String?
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+
+  studentProfile   StudentProfile?
+  teacherProfile   TeacherProfile?
+  notifications    Notification[]
+  auditLogs        AuditLog[]
+
+  @@index([email])
+}
+
+model Department {
+  id          String   @id @default(uuid())
+  code        String   @unique // e.g. "CE", "IT", "EC"
+  name        String   // e.g. "Computer Engineering"
+  description String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  courses     Course[]
+  teachers    TeacherProfile[]
+}
+
+model Course {
+  id           String      @id @default(uuid())
+  code         String      @unique // e.g. "BE_CE"
+  title        String      // e.g. "Bachelor of Engineering in Computer Engineering"
+  degree       String      // e.g. "B.E."
+  departmentId String
+  department   Department  @relation(fields: [departmentId], references: [id], onDelete: Cascade)
+  createdAt    DateTime    @default(now())
+  updatedAt    DateTime    @updatedAt
+
+  students     StudentProfile[]
+  semesters    Semester[]
+
+  @@index([departmentId])
+}
+
+model Semester {
+  id          String   @id @default(uuid())
+  number      Int      // e.g., 7 for GTU Semester 7
+  schemeYear  String   // e.g., "2021-22"
+  courseId    String
+  course      Course   @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  subjects    Subject[]
+  students    StudentProfile[]
+
+  @@unique([courseId, number, schemeYear])
+}
+
+model Subject {
+  id          String    @id @default(uuid())
+  code        String    @unique // e.g. "3170701" (GTU Code for Compiler Design)
+  name        String    // e.g. "Compiler Design"
+  shortName   String?   // e.g. "CD"
+  semesterId  String
+  semester    Semester  @relation(fields: [semesterId], references: [id], onDelete: Cascade)
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  timetables  TimetableEntry[]
+  materials   StudyMaterial[]
+  assignments Assignment[]
+
+  @@index([semesterId])
+}
+
+model StudentProfile {
+  id             String    @id @default(uuid())
+  userId         String    @unique
+  user           User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  enrollmentNo   String    @unique
+  division       String    // e.g. "A", "B"
+  batch          String?   // e.g. "A1"
+  courseId       String
+  course         Course    @relation(fields: [courseId], references: [id])
+  semesterId     String
+  semester       Semester  @relation(fields: [semesterId], references: [id])
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+
+  campusStatus   StudentAvailability?
+}
+
+model TeacherProfile {
+  id             String             @id @default(uuid())
+  userId         String             @unique
+  user           User               @relation(fields: [userId], references: [id], onDelete: Cascade)
+  employeeId     String             @unique
+  designation    String             // e.g. "Assistant Professor"
+  departmentId   String
+  department     Department         @relation(fields: [departmentId], references: [id])
+  officeLocation String?            // e.g. "Block A, Room 302"
+  officeHours    String?            // e.g. "Mon-Wed 2:00 PM - 4:00 PM"
+  currentStatus  AvailabilityStatus @default(NOT_UPDATED)
+  customNote     String?
+  lastStatusUpdate DateTime         @default(now())
+  createdAt      DateTime           @default(now())
+  updatedAt      DateTime           @updatedAt
+
+  timetables     TimetableEntry[]
+  availabilityLogs TeacherAvailabilityLog[]
+  materialsUploaded StudyMaterial[]
+  announcements  Announcement[]
+}
+
+model Classroom {
+  id          String   @id @default(uuid())
+  roomNo      String   @unique // e.g. "LH-101", "LAB-3"
+  building    String   // e.g. "Main Academic Block"
+  capacity    Int      @default(60)
+  isLab       Boolean  @default(false)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  timetables  TimetableEntry[]
+}
+
+model TimetableEntry {
+  id          String    @id @default(uuid())
+  dayOfWeek   Int       // 1 = Monday, 6 = Saturday
+  startTime   String    // e.g. "10:30"
+  endTime     String    // e.g. "11:30"
+  division    String    // e.g. "A"
+  batch       String?   // optional for labs e.g. "A1"
+  subjectId   String
+  subject     Subject   @relation(fields: [subjectId], references: [id], onDelete: Cascade)
+  teacherId   String
+  teacher     TeacherProfile @relation(fields: [teacherId], references: [id])
+  classroomId String
+  classroom   Classroom @relation(fields: [classroomId], references: [id])
+  isCancelled Boolean   @default(false)
+  note        String?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  @@index([dayOfWeek, classroomId])
+  @@index([dayOfWeek, teacherId])
+}
+
+model TeacherAvailabilityLog {
+  id          String             @id @default(uuid())
+  teacherId   String
+  teacher     TeacherProfile     @relation(fields: [teacherId], references: [id], onDelete: Cascade)
+  status      AvailabilityStatus
+  location    String?
+  note        String?
+  updatedAt   DateTime           @default(now())
+}
+
+model StudentAvailability {
+  id          String              @id @default(uuid())
+  studentId   String              @unique
+  student     StudentProfile      @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  status      StudentCampusStatus @default(AWAY)
+  visibility  VisibilityLevel     @default(STUDENTS_ONLY)
+  note        String?
+  updatedAt   DateTime            @updatedAt
+}
+
+model StudyMaterial {
+  id            String       @id @default(uuid())
+  title         String
+  description   String?
+  type          ResourceType
+  fileUrl       String
+  fileFormat    String       // e.g. "pdf", "zip", "link"
+  fileSize      String?
+  academicYear  String       // e.g. "2023-24"
+  isGtuVerified Boolean      @default(true)
+  subjectId     String
+  subject       Subject      @relation(fields: [subjectId], references: [id], onDelete: Cascade)
+  uploadedById  String
+  uploadedBy    TeacherProfile @relation(fields: [uploadedById], references: [id])
+  createdAt     DateTime     @default(now())
+  updatedAt     DateTime     @updatedAt
+
+  @@index([subjectId, type])
+}
+
+model Assignment {
+  id          String    @id @default(uuid())
+  title       String
+  description String
+  dueDate     DateTime
+  fileUrl     String?
+  subjectId   String
+  subject     Subject   @relation(fields: [subjectId], references: [id], onDelete: Cascade)
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+}
+
+model Announcement {
+  id          String         @id @default(uuid())
+  title       String
+  content     String
+  isImportant Boolean        @default(false)
+  authorId    String
+  author      TeacherProfile @relation(fields: [authorId], references: [id])
+  createdAt   DateTime       @default(now())
+  updatedAt   DateTime       @updatedAt
+}
+
+model Notification {
+  id        String   @id @default(uuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  title     String
+  message   String
+  isRead    Boolean  @default(false)
+  createdAt DateTime @default(now())
+}
+
+model AuditLog {
+  id        String   @id @default(uuid())
+  userId    String?
+  user      User?    @relation(fields: [userId], references: [id], onDelete: SetNull)
+  action    String
+  details   String
+  ipAddress String?
+  createdAt DateTime @default(now())
+}

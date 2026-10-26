@@ -1,0 +1,24 @@
+* { margin: 0; padding: 0; box-sizing: border-box; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
+body { background: #0b0f19; color: #f3f4f6; line-height: 1.6; }
+.navbar { display: flex; justify-content: space-between; align-items: center; padding: 20px 48px; border-bottom: 1px solid rgba(255,255,255,0.08); background: rgba(11,15,25,0.8); backdrop-filter: blur(12px); position: sticky; top: 0; z-index: 100; }
+.logo { font-size: 20px; font-weight: 700; color: #fff; }
+.logo span { color: #6366f1; }
+nav a { color: #9ca3af; text-decoration: none; margin-left: 24px; font-weight: 500; transition: color 0.2s; }
+nav a:hover { color: #6366f1; }
+.hero { padding: 100px 48px 60px; text-align: center; max-width: 800px; margin: 0 auto; }
+.hero h1 { font-size: 48px; font-weight: 800; margin-bottom: 16px; }
+.gradient-text { background: linear-gradient(135deg, #6366f1 0%, #a855f7 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+.subtitle { font-size: 20px; color: #9ca3af; margin-bottom: 32px; }
+.cta-group { display: flex; justify-content: center; gap: 16px; }
+.btn { padding: 12px 28px; border-radius: 8px; font-weight: 600; text-decoration: none; transition: all 0.2s; }
+.btn-primary { background: #6366f1; color: #fff; }
+.btn-primary:hover { background: #4f46e5; transform: translateY(-2px); }
+.btn-secondary { background: rgba(255,255,255,0.06); color: #fff; border: 1px solid rgba(255,255,255,0.12); }
+.btn-secondary:hover { background: rgba(255,255,255,0.1); }
+.skills-section { padding: 60px 48px; max-width: 1000px; margin: 0 auto; }
+.skills-section h2 { text-align: center; font-size: 32px; margin-bottom: 36px; }
+.skills-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 20px; }
+.skill-card { background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 12px; padding: 24px; text-align: center; transition: border-color 0.2s; }
+.skill-card:hover { border-color: #6366f1; }
+.skill-card h3 { font-size: 18px; color: #fff; margin-bottom: 8px; }
+.skill-card p { font-size: 14px; color: #9ca3af; }
